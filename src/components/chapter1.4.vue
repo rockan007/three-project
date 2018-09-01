@@ -9,6 +9,7 @@
 import * as THREE from "three";
 //显示帧数的库
 import Stats from "stats-js/build/stats.min.js";
+import * as dat from "dat.gui";
 export default {
   name: "chapter1-4",
   props: {
@@ -20,13 +21,39 @@ export default {
       scene: "",
       renderer: "",
       mesh: "",
-      stats: ""
+      stats: "",
+      cube: "",
+      sphere: "",
+      step: 0,
+      controls: {
+        rotationSpeed: 0.02,
+        bouncingSpeed: 0.03
+      }
     };
   },
   mounted: function() {
+    this.initResize();
+    this.initDatGui();
     this.init();
   },
   methods: {
+    initResize: function() {
+      window.addEventListener("resize", this.onResize, false);
+    },
+    onResize: function() {
+      console.log("获取当前数据onResize");
+      let dom = document.getElementById("three");
+      console.log("three的宽度："+dom.clientWidth);
+      console.log("three的高度："+dom.clientHeight);
+      this.camera.aspect = dom.clientWidth / dom.clientHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(dom.clientWidth, dom.clientHeight);
+    },
+    initDatGui: function() {
+      let gui = new dat.GUI();
+      gui.add(this.controls, "rotationSpeed", 0, 0.5);
+      gui.add(this.controls, "bouncingSpeed", 0, 0.5);
+    },
     initStats: function() {
       let stats = new Stats();
       stats.setMode(0);
@@ -37,7 +64,7 @@ export default {
       return stats;
     },
     init: function() {
-      this.stats=this.initStats();
+      this.stats = this.initStats();
       let dom = document.getElementById("three");
       let innerWidth = dom.clientWidth;
       let innerHeight = dom.clientHeight;
@@ -85,21 +112,21 @@ export default {
         color: 0xff0000
         // wireframe: true//线框
       });
-      let cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-      cube.castShadow = true;
+      this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      this.cube.castShadow = true;
 
-      cube.position.set(-4, 3, 0);
-      this.scene.add(cube);
+      this.cube.position.set(-4, 3, 0);
+      this.scene.add(this.cube);
 
       let sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
       let sphereMeterial = new THREE.MeshLambertMaterial({
         color: 0x7777ff
       });
-      let sphere = new THREE.Mesh(sphereGeometry, sphereMeterial);
-      sphere.castShadow = true;
+      this.sphere = new THREE.Mesh(sphereGeometry, sphereMeterial);
+      this.sphere.castShadow = true;
 
-      sphere.position.set(20, 4, 2);
-      this.scene.add(sphere);
+      this.sphere.position.set(20, 4, 2);
+      this.scene.add(this.sphere);
 
       //设置相机位置
       this.camera.position.set(-30, 40, 30);
@@ -120,6 +147,13 @@ export default {
     },
     animate: function() {
       this.stats.update();
+
+      this.step += this.controls.bouncingSpeed;
+      this.sphere.position.x = 20 + 10 * Math.cos(this.step);
+      this.sphere.position.y = 2 + 10 * Math.abs(Math.sin(this.step));
+      this.cube.rotation.x += this.controls.rotationSpeed;
+      this.cube.rotation.y += this.controls.rotationSpeed;
+      this.cube.rotation.z += this.controls.rotationSpeed;
       requestAnimationFrame(this.animate);
       this.renderer.render(this.scene, this.camera);
     }

@@ -1,6 +1,6 @@
 <template>
   <div class="home d-flex">
-    <chapter1-4 class="flex-grow-1" msg="Welcome to Your Vue.js App"/>
+    <chapter1-4 class="flex-grow-1 flex-shrink-1" msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
 
